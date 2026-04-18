@@ -79,10 +79,10 @@ export const modelCutoffDates: Record<ModelName, string> &
 
 export const modelDisplayNames: Record<ModelName, string> &
   Record<string, string> = {
-  "ask-model": "Auto, an intelligent model router built by HackerAI",
-  "ask-model-free": "Auto, an intelligent model router built by HackerAI",
-  "agent-model": "Auto, an intelligent model router built by HackerAI",
-  "agent-model-free": "Auto, an intelligent model router built by HackerAI",
+  "ask-model": "Auto, an intelligent model router built by EliTechWiz-Ai",
+  "ask-model-free": "Auto, an intelligent model router built by EliTechWiz-Ai",
+  "agent-model": "Auto, an intelligent model router built by EliTechWiz-Ai",
+  "agent-model-free": "Auto, an intelligent model router built by EliTechWiz-Ai",
   "model-sonnet-4.6": "Anthropic Claude Sonnet 4.6",
   "model-grok-4.1": "xAI Grok 4.1 Fast",
   "model-gemini-3-flash": "Google Gemini 3 Flash",
@@ -90,10 +90,10 @@ export const modelDisplayNames: Record<ModelName, string> &
   "model-opus-4.7": "Anthropic Claude Opus 4.7",
   "model-gpt-5.4": "OpenAI GPT-5.4",
   "model-kimi-k2.5": "Moonshot Kimi K2.5",
-  "fallback-agent-model": "Auto, an intelligent model router built by HackerAI",
-  "fallback-ask-model": "Auto, an intelligent model router built by HackerAI",
+  "fallback-agent-model": "Auto, an intelligent model router built by EliTechWiz-Ai",
+  "fallback-ask-model": "Auto, an intelligent model router built by EliTechWiz-Ai",
   "title-generator-model":
-    "Auto, an intelligent model router built by HackerAI",
+    "Auto, an intelligent model router built by EliTechWiz-Ai",
   "model-codex-local": "OpenAI Codex (Your Account)",
 };
 
@@ -145,7 +145,7 @@ export const myProvider = customProvider({
  * Create an OpenRouter provider using a user-supplied API key (BYOK).
  * Routes through the same model map as the default provider, so existing
  * model selection logic works unchanged. LLM costs bill to the user's
- * OpenRouter account instead of HackerAI's.
+ * OpenRouter account instead of EliTechWiz-Ai's.
  */
 export function createByokTrackedProvider(apiKey: string) {
   const byokOpenRouter = createOpenRouter({

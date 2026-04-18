@@ -348,7 +348,7 @@ describe("CentrifugoSandbox", () => {
 
       try {
         const sandbox = createSandbox();
-        await sandbox.files.write("/tmp/hackerai/test.txt", "hello world");
+        await sandbox.files.write("/tmp/elitechwiz-ai/test.txt", "hello world");
 
         // files.write runs mkdir -p then cat > ... heredoc.
         // Find the subscription whose publish was called with a cat > command
@@ -363,7 +363,7 @@ describe("CentrifugoSandbox", () => {
         expect(writeCmd).toBeDefined();
 
         expect(writeCmd.command).toContain("cat >");
-        expect(writeCmd.command).toContain("<<'HACKERAI_EOF_");
+        expect(writeCmd.command).toContain("<<'ELITECHWIZ_AI_EOF_");
         expect(writeCmd.command).toContain("hello world");
       } finally {
         jest.useFakeTimers();
@@ -406,24 +406,24 @@ describe("CentrifugoSandbox", () => {
       // Mock validateDownloadUrl is real; use an https URL it accepts.
       await sandbox.files.downloadFromUrl(
         "https://example.com/image.png",
-        "/tmp/hackerai-upload/image.png",
+        "/tmp/elitechwiz-ai-upload/image.png",
       );
       const cmd = runs[0];
-      expect(cmd).toContain("mkdir -p '/c/temp/hackerai-upload'");
+      expect(cmd).toContain("mkdir -p '/c/temp/elitechwiz-ai-upload'");
       expect(cmd).toContain("curl -fsSL");
       expect(cmd).toContain("--retry 3");
       expect(cmd).toContain("--retry-delay 1");
       expect(cmd).toContain("--retry-all-errors");
       expect(cmd).toContain("--retry-connrefused");
-      expect(cmd).toContain("-o '/c/temp/hackerai-upload/image.png'");
+      expect(cmd).toContain("-o '/c/temp/elitechwiz-ai-upload/image.png'");
       expect(cmd).not.toContain("if not exist");
       expect(cmd).not.toContain("\\");
     });
 
     it("ensureDirectory emits mkdir -p with MSYS path", async () => {
       const { sandbox, runs } = createWindowsBashSandbox();
-      await (sandbox as any).ensureDirectory("C:\\temp\\hackerai-upload");
-      expect(runs[0]).toBe("mkdir -p '/c/temp/hackerai-upload'");
+      await (sandbox as any).ensureDirectory("C:\\temp\\elitechwiz-ai-upload");
+      expect(runs[0]).toBe("mkdir -p '/c/temp/elitechwiz-ai-upload'");
     });
 
     it("files.read uses cat with MSYS path", async () => {
@@ -451,7 +451,7 @@ describe("CentrifugoSandbox", () => {
       // First call is the ensureDirectory mkdir -p, second is the write itself.
       expect(runs[0]).toBe("mkdir -p '/c/temp/foo'");
       expect(runs[1]).toContain("cat > '/c/temp/foo/bar.txt'");
-      expect(runs[1]).toContain("<<'HACKERAI_EOF_");
+      expect(runs[1]).toContain("<<'ELITECHWIZ_AI_EOF_");
       expect(runs[1]).toContain("hello");
       // No certutil / cmd.exe artifacts.
       expect(runs[1]).not.toContain("certutil");

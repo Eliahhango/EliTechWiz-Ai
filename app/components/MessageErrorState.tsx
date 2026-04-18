@@ -114,7 +114,7 @@ export const MessageErrorState = ({
                 variant="default"
                 size="sm"
                 onClick={() =>
-                  window.open("https://help.hackerai.co/", "_blank")
+                  window.open("https://help.elitechwiz-ai.co/", "_blank")
                 }
               >
                 Contact Support

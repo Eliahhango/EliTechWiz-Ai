@@ -411,7 +411,7 @@ const PricingDialog: React.FC<PricingDialogProps> = ({ isOpen, onClose }) => {
                   <PlanCard
                     planName="Free"
                     price={0}
-                    description="Try HackerAI"
+                    description="Try EliTechWiz-Ai"
                     features={freeFeatures}
                     buttonText={freeButtonConfig.text}
                     buttonVariant={freeButtonConfig.variant}
@@ -458,7 +458,7 @@ const PricingDialog: React.FC<PricingDialogProps> = ({ isOpen, onClose }) => {
                   <PlanCard
                     planName="Free"
                     price={0}
-                    description="Try HackerAI"
+                    description="Try EliTechWiz-Ai"
                     features={freeFeatures}
                     buttonText={freeButtonConfig.text}
                     buttonVariant={freeButtonConfig.variant}
@@ -511,7 +511,7 @@ const PricingDialog: React.FC<PricingDialogProps> = ({ isOpen, onClose }) => {
                   price={
                     isYearly ? PRICING.ultra.yearly : PRICING.ultra.monthly
                   }
-                  description="Get the most out of HackerAI"
+                  description="Get the most out of EliTechWiz-Ai"
                   features={ultraFeatures}
                   buttonText={ultraButtonConfig.text}
                   buttonVariant={ultraButtonConfig.variant}

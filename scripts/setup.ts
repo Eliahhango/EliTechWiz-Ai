@@ -415,7 +415,7 @@ async function setupConvex(): Promise<{
 }
 
 async function main() {
-  console.log(chalk.bold.blue("🚀 HackerAI Setup Script"));
+  console.log(chalk.bold.blue("🚀 EliTechWiz-Ai Setup Script"));
   console.log(
     "This script will help you configure all the necessary environment variables\n",
   );

@@ -1,17 +1,17 @@
 <p align="center">
-  <a href="https://hackerai.co/">
-    <img src="public/icon-512x512.png" width="150" alt="HackerAI Logo">
+  <a href="https://elitechwiz-ai.co/">
+    <img src="public/icon-512x512.png" width="150" alt="EliTechWiz-Ai Logo">
   </a>
 </p>
 
-<h1 align="center">HackerAI</h1>
+<h1 align="center">EliTechWiz-Ai</h1>
 
 <h2 align="center">Your AI-Powered Penetration Testing Assistant</h2>
 
 <div align="center">
 
 [![License](https://img.shields.io/badge/License-Apache%202.0%20with%20Commercial%20Restrictions-red.svg)](LICENSE)
-[![Website](https://img.shields.io/badge/Website-hackerai.co-2d3748.svg)](https://hackerai.co)
+[![Website](https://img.shields.io/badge/Website-elitechwiz-ai.co-2d3748.svg)](https://elitechwiz-ai.co)
 
 </div>
 
@@ -42,13 +42,13 @@ You'll need the following accounts:
 ### Clone the repo
 
 ```bash
-git clone https://github.com/hackerai-tech/hackerai.git
+git clone https://github.com/Eliahhango/EliTechWiz-Ai.git
 ```
 
 ### Navigate to the project directory
 
 ```bash
-cd hackerai
+cd elitechwiz-ai
 ```
 
 ### Install dependencies

@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Header from "@/app/components/Header";
-import { HackerAISVG } from "@/components/icons/hackerai-svg";
+import { EliTechWizAiSVG } from "@/components/icons/elitechwiz-ai-svg";
 import { DownloadSection } from "./DownloadSection";
 import { downloadLinks } from "./constants";
 import { AppleIcon, WindowsIcon, LinuxIcon } from "./icons";
@@ -15,9 +15,9 @@ function AuthenticatedHeader() {
     <header className="w-full px-6 max-sm:px-4 flex-shrink-0">
       <div className="py-[10px] flex gap-10 items-center justify-between">
         <div className="flex items-center gap-2">
-          <HackerAISVG theme="dark" scale={0.15} />
+          <EliTechWizAiSVG theme="dark" scale={0.15} />
           <span className="text-foreground text-xl font-semibold max-sm:text-lg">
-            HackerAI
+            EliTechWiz-Ai
           </span>
         </div>
         <Button
@@ -42,7 +42,7 @@ function DownloadContent() {
       <div className="container mx-auto max-w-3xl space-y-8">
         <div className="text-center">
           <h1 className="mb-4 text-4xl font-bold text-card-foreground">
-            Download HackerAI
+            Download EliTechWiz-Ai
           </h1>
           <p className="text-lg text-muted-foreground">
             Get the desktop app for the best experience

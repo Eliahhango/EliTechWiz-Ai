@@ -1,9 +1,9 @@
 FROM kalilinux/kali-rolling
 
-LABEL org.opencontainers.image.title="HackerAI Agent Sandbox"
+LABEL org.opencontainers.image.title="EliTechWiz-Ai Agent Sandbox"
 LABEL org.opencontainers.image.description="AI Agent Penetration Testing Environment with Comprehensive Automated Tools"
-LABEL org.opencontainers.image.source="https://github.com/hackerai-tech/hackerai"
-LABEL org.opencontainers.image.vendor="HackerAI"
+LABEL org.opencontainers.image.source="https://github.com/Eliahhango/EliTechWiz-Ai"
+LABEL org.opencontainers.image.vendor="EliTechWiz-Ai"
 
 # ============================================================================
 # Environment Variables

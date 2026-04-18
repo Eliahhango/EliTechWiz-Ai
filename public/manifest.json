@@ -1,7 +1,7 @@
 {
-  "short_name": "HackerAI",
-  "name": "HackerAI",
-  "description": "HackerAI - AI-Powered Penetration Testing Assistant",
+  "short_name": "EliTechWiz-Ai",
+  "name": "EliTechWiz-Ai",
+  "description": "EliTechWiz-Ai - AI-Powered Penetration Testing Assistant",
   "icons": [
     {
       "src": "/icon-192x192.png",

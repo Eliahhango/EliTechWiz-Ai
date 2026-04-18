@@ -46,7 +46,7 @@ export async function navigateToAuth(
       let loginUrl = `${window.location.origin}/desktop-login`;
 
       // In dev mode, pass the local auth callback port so the server
-      // redirects to localhost instead of the hackerai:// deep link
+      // redirects to localhost instead of the elitechwiz-ai:// deep link
       try {
         const { invoke } = await import("@tauri-apps/api/core");
         const port = await invoke<number>("get_dev_auth_port");
@@ -146,7 +146,7 @@ export async function saveFileToLocal(
 
   const escaped = filename.replace(/'/g, "'\\''");
 
-  const delimiter = `HACKERAI_EOF_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
+  const delimiter = `ELITECHWIZ_AI_EOF_${Date.now()}_${Math.random().toString(36).substring(2, 10)}`;
 
   const writeToDir = async (dir: string) => {
     const targetPath = `${dir}/${escaped}`;

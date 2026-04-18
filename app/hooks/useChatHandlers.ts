@@ -160,7 +160,7 @@ export const useChatHandlers = ({
     if (isCodexLocal(selectedModel) && !isTauriEnvironment()) {
       toast.error("This chat requires the desktop app", {
         description:
-          "Codex models run locally and need the HackerAI desktop app.",
+          "Codex models run locally and need the EliTechWiz-Ai desktop app.",
       });
       return;
     }

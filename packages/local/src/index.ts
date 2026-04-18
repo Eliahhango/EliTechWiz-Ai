@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 
 /**
- * HackerAI Local Sandbox Client
+ * EliTechWiz-Ai Local Sandbox Client
  *
- * Connects to HackerAI backend via Convex for connection lifecycle
+ * Connects to EliTechWiz-Ai backend via Convex for connection lifecycle
  * and uses Centrifugo for real-time command relay and streaming output.
  *
  * Runs commands directly on the host OS (no Docker isolation).
  *
  * Usage:
- *   npx @hackerai/local --token TOKEN --name "My Machine"
+ *   npx @elitechwiz-ai/local --token TOKEN --name "My Machine"
  */
 
 import { ConvexHttpClient } from "convex/browser";
@@ -240,7 +240,7 @@ class LocalSandboxClient {
   }
 
   async start(): Promise<void> {
-    console.log(chalk.blue("🚀 Starting HackerAI local sandbox..."));
+    console.log(chalk.blue("🚀 Starting EliTechWiz-Ai local sandbox..."));
     console.log(
       chalk.yellow(
         "⚠️  Commands run directly on your OS without any isolation.",
@@ -259,7 +259,7 @@ class LocalSandboxClient {
   }
 
   private async connect(): Promise<void> {
-    console.log(chalk.blue("Connecting to HackerAI..."));
+    console.log(chalk.blue("Connecting to EliTechWiz-Ai..."));
 
     try {
       const result = (await this.convexHttp.mutation(
@@ -739,10 +739,10 @@ const hasFlag = (flag: string): boolean => {
 // Show help
 if (hasFlag("--help") || hasFlag("-h")) {
   console.log(`
-${chalk.bold("HackerAI Local Sandbox Client")}
+${chalk.bold("EliTechWiz-Ai Local Sandbox Client")}
 
 ${chalk.yellow("Usage:")}
-  npx @hackerai/local --token TOKEN [options]
+  npx @elitechwiz-ai/local --token TOKEN [options]
 
 ${chalk.yellow("Options:")}
   --token TOKEN       Authentication token from Settings (required)
@@ -751,8 +751,8 @@ ${chalk.yellow("Options:")}
   --help, -h          Show this help message
 
 ${chalk.yellow("Examples:")}
-  npx @hackerai/local --token hsb_abc123 --name "My Laptop"
-  npx @hackerai/local --token hsb_abc123 --name "Work PC"
+  npx @elitechwiz-ai/local --token hsb_abc123 --name "My Laptop"
+  npx @elitechwiz-ai/local --token hsb_abc123 --name "Work PC"
 
 ${chalk.red("⚠️  Security Warning:")}
   Commands run directly on your OS without any isolation.
@@ -773,8 +773,8 @@ const config: Config = {
 
 if (!config.token) {
   console.error(chalk.red("❌ No authentication token provided"));
-  console.error(chalk.yellow("Usage: npx @hackerai/local --token YOUR_TOKEN"));
-  console.error(chalk.yellow("Get your token from HackerAI Settings > Agents"));
+  console.error(chalk.yellow("Usage: npx @elitechwiz-ai/local --token YOUR_TOKEN"));
+  console.error(chalk.yellow("Get your token from EliTechWiz-Ai Settings > Agents"));
   process.exit(1);
 }
 

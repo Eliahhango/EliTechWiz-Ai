@@ -170,7 +170,7 @@ async function createAutoReloadPayment(
       invoice: invoice.id,
       amount: amountCents,
       currency: "usd",
-      description: `HackerAI Extra Usage Auto-Reload ($${amountCents / 100})`,
+      description: `EliTechWiz-Ai Extra Usage Auto-Reload ($${amountCents / 100})`,
     });
 
     // Finalize the invoice
@@ -333,7 +333,7 @@ export const createPurchaseSession = action({
             price_data: {
               currency: "usd",
               product_data: {
-                name: "HackerAI Extra Usage Credits",
+                name: "EliTechWiz-Ai Extra Usage Credits",
                 description: `$${args.amountDollars} in extra usage credits`,
               },
               unit_amount: amountCents,

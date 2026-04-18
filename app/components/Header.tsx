@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { HackerAISVG } from "@/components/icons/hackerai-svg";
+import { EliTechWizAiSVG } from "@/components/icons/elitechwiz-ai-svg";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@workos-inc/authkit-nextjs/components";
 import { navigateToAuth } from "@/app/hooks/useTauri";
@@ -21,9 +21,9 @@ const Header: React.FC<HeaderProps> = ({ chatTitle, hideDownload = false }) => {
       {/* Desktop header */}
       <div className="py-[10px] flex gap-10 items-center justify-between max-md:hidden">
         <div className="flex items-center gap-2">
-          <HackerAISVG theme="dark" scale={0.15} />
+          <EliTechWizAiSVG theme="dark" scale={0.15} />
           <span className="text-foreground text-xl font-semibold">
-            HackerAI
+            EliTechWiz-Ai
           </span>
         </div>
         <div className="flex flex-1 gap-2 justify-between items-center">
@@ -76,9 +76,9 @@ const Header: React.FC<HeaderProps> = ({ chatTitle, hideDownload = false }) => {
       {/* Mobile header */}
       <div className="py-3 flex items-center justify-between md:hidden">
         <div className="flex items-center gap-2">
-          <HackerAISVG theme="dark" scale={0.12} />
+          <EliTechWizAiSVG theme="dark" scale={0.12} />
           <span className="text-foreground text-lg font-semibold">
-            HackerAI
+            EliTechWiz-Ai
           </span>
         </div>
         {!loading && !user && (

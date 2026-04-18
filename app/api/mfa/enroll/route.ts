@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
     const result = await workos.userManagement.enrollAuthFactor({
       userId: userId,
       type: "totp",
-      totpIssuer: "HackerAI",
+      totpIssuer: "EliTechWiz-Ai",
     });
 
     // Return factor and challenge details

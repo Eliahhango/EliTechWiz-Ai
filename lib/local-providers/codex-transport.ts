@@ -245,8 +245,8 @@ export class CodexLocalTransport {
         console.log("[CodexTransport] Initializing...");
         await this.rpcRequest("initialize", {
           clientInfo: {
-            name: "hackerai",
-            title: "HackerAI Desktop",
+            name: "elitechwiz-ai",
+            title: "EliTechWiz-Ai Desktop",
             version: "0.1.0",
           },
         });

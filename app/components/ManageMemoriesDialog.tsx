@@ -69,7 +69,7 @@ const ManageMemoriesDialog = ({
             Saved memories
           </DialogTitle>
           <div className="text-xs text-muted-foreground text-left mt-1">
-            HackerAI tries to remember most of your chats, but it may forget
+            EliTechWiz-Ai tries to remember most of your chats, but it may forget
             things over time. Saved memories are never forgotten.
           </div>
         </DialogHeader>
@@ -90,7 +90,7 @@ const ManageMemoriesDialog = ({
                       No memories saved yet
                     </div>
                     <div className="text-sm text-muted-foreground/70">
-                      HackerAI will automatically save relevant information as
+                      EliTechWiz-Ai will automatically save relevant information as
                       you chat.
                     </div>
                   </div>

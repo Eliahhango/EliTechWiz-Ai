@@ -10,7 +10,7 @@ export type SandboxFile = {
 };
 
 /**
- * E2B uses /home/user/upload; any local connection uses /tmp/hackerai-upload
+ * E2B uses /home/user/upload; any local connection uses /tmp/elitechwiz-ai-upload
  * since the host machine may not have /home/user (e.g. macOS in dangerous mode).
  */
 export const getUploadBasePath = (
@@ -18,7 +18,7 @@ export const getUploadBasePath = (
 ): string =>
   sandboxPreference === "e2b" || !sandboxPreference
     ? "/home/user/upload"
-    : "/tmp/hackerai-upload";
+    : "/tmp/elitechwiz-ai-upload";
 
 const getLastUserMessageIndex = (messages: UIMessage[]): number => {
   for (let i = messages.length - 1; i >= 0; i--) {

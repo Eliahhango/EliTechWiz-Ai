@@ -250,7 +250,7 @@ export function captureToolCalls({
   for (const tool of toolCalls) {
     posthog.capture({
       distinctId: userId,
-      event: "hackerai-" + tool.name,
+      event: "elitechwiz-ai-" + tool.name,
       properties: {
         mode,
         ...(tool.sandbox_type && { sandboxType: tool.sandbox_type }),

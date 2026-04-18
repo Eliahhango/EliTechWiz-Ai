@@ -2,20 +2,20 @@ import type { Metadata } from "next";
 import { DownloadPageContent } from "./DownloadPageContent";
 
 export const metadata: Metadata = {
-  title: "Download | HackerAI",
+  title: "Download | EliTechWiz-Ai",
   description:
-    "Download HackerAI desktop app for macOS, Windows, and Linux. AI-powered penetration testing at your fingertips.",
+    "Download EliTechWiz-Ai desktop app for macOS, Windows, and Linux. AI-powered penetration testing at your fingertips.",
   openGraph: {
-    title: "Download HackerAI Desktop",
+    title: "Download EliTechWiz-Ai Desktop",
     description:
-      "Download HackerAI desktop app for macOS, Windows, and Linux. AI-powered penetration testing at your fingertips.",
+      "Download EliTechWiz-Ai desktop app for macOS, Windows, and Linux. AI-powered penetration testing at your fingertips.",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Download HackerAI Desktop",
+    title: "Download EliTechWiz-Ai Desktop",
     description:
-      "Download HackerAI desktop app for macOS, Windows, and Linux. AI-powered penetration testing at your fingertips.",
+      "Download EliTechWiz-Ai desktop app for macOS, Windows, and Linux. AI-powered penetration testing at your fingertips.",
   },
 };
 

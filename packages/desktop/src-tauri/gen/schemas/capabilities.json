@@ -1,8 +1,8 @@
 {
   "default": {
     "identifier": "default",
-    "description": "Default capabilities for HackerAI Desktop",
-    "remote": { "urls": ["http://localhost:*", "https://hackerai.co/*"] },
+    "description": "Default capabilities for EliTechWiz-Ai Desktop",
+    "remote": { "urls": ["http://localhost:*", "https://elitechwiz-ai.co/*"] },
     "local": true,
     "windows": ["main"],
     "permissions": [
@@ -24,8 +24,8 @@
         "allow": [
           { "path": "$HOME/**" },
           { "path": "$DOWNLOAD/**" },
-          { "path": "/tmp/hackerai-upload/**" },
-          { "path": "/tmp/hackerai/**" }
+          { "path": "/tmp/elitechwiz-ai-upload/**" },
+          { "path": "/tmp/elitechwiz-ai/**" }
         ]
       }
     ]

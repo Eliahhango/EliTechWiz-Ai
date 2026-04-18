@@ -209,9 +209,9 @@ const ExtraUsageSection = () => {
           <div className="w-full min-w-0 flex flex-row gap-4 items-center">
             <div className="flex flex-col gap-1.5 min-w-0">
               <p className="text-sm">
-                Turn on extra usage to keep using HackerAI if you hit a limit.{" "}
+                Turn on extra usage to keep using EliTechWiz-Ai if you hit a limit.{" "}
                 <a
-                  href="https://help.hackerai.co/en/articles/13455916-extra-usage-for-paid-hackerai-plans"
+                  href="https://help.elitechwiz-ai.co/en/articles/13455916-extra-usage-for-paid-elitechwiz-ai-plans"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline underline underline-offset-[3px] text-muted-foreground hover:text-foreground"
@@ -280,7 +280,7 @@ const ExtraUsageSection = () => {
                     Your extra usage limit is ${trustCapDollars}/month while
                     your account builds payment history.{" "}
                     <a
-                      href="mailto:support@hackerai.co"
+                      href="mailto:support@elitechwiz-ai.co"
                       className="underline underline-offset-[3px] hover:text-foreground"
                     >
                       Contact us

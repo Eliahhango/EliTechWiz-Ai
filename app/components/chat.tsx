@@ -463,7 +463,7 @@ export const Chat = ({ autoResume }: { autoResume: boolean }) => {
             if (!sidecarOk) {
               toast.error("This chat requires the desktop app", {
                 description:
-                  "Codex models run locally and need the HackerAI desktop app.",
+                  "Codex models run locally and need the EliTechWiz-Ai desktop app.",
               });
               return false;
             }
@@ -1210,7 +1210,7 @@ export const Chat = ({ autoResume }: { autoResume: boolean }) => {
                             </h1>
                             <p className="text-muted-foreground max-w-md mx-auto px-4 py-3">
                               This chat won&apos;t appear in history, use or
-                              update HackerAI&apos;s memory, or be used to train
+                              update EliTechWiz-Ai&apos;s memory, or be used to train
                               models. This chat will be deleted when you refresh
                               the page.
                             </p>

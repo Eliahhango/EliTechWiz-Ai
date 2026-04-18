@@ -1,9 +1,9 @@
 {
-  "name": "@hackerai/local",
+  "name": "@elitechwiz-ai/local",
   "version": "0.7.2",
-  "description": "HackerAI Local Sandbox Client - Execute commands on your local machine",
+  "description": "EliTechWiz-Ai Local Sandbox Client - Execute commands on your local machine",
   "bin": {
-    "hackerai-local": "./dist/index.js"
+    "elitechwiz-ai-local": "./dist/index.js"
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -16,17 +16,17 @@
     "prepublishOnly": "npm run build"
   },
   "keywords": [
-    "hackerai",
+    "elitechwiz-ai",
     "sandbox",
     "pentesting",
     "security",
     "cli"
   ],
-  "author": "HackerAI",
+  "author": "EliTechWiz-Ai",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hackerai-tech/hackerai.git",
+    "url": "https://github.com/Eliahhango/EliTechWiz-Ai.git",
     "directory": "packages/local"
   },
   "engines": {

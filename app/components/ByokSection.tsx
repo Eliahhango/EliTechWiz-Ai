@@ -148,7 +148,7 @@ const ByokSection = () => {
               your OpenRouter key
             </a>{" "}
             to route LLM calls through your account. Sandbox and tools still
-            bill to your HackerAI plan.
+            bill to your EliTechWiz-Ai plan.
           </p>
         </div>
         <Switch

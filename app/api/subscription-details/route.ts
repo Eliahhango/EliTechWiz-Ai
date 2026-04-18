@@ -77,7 +77,7 @@ export const POST = async (req: NextRequest) => {
         return NextResponse.json(
           {
             error:
-              "Too many failed payment attempts. If you need help, contact us via chat at https://help.hackerai.co/",
+              "Too many failed payment attempts. If you need help, contact us via chat at https://help.elitechwiz-ai.co/",
           },
           { status: 429 },
         );

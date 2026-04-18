@@ -121,7 +121,7 @@ const BuyExtraUsageDialogContent = ({
       <div className="flex flex-col gap-5 pt-4">
         <div>
           <label className="block text-muted-foreground text-sm mb-3">
-            Get extra usage to keep using HackerAI when you hit a limit.
+            Get extra usage to keep using EliTechWiz-Ai when you hit a limit.
           </label>
           <Input
             placeholder="$15"

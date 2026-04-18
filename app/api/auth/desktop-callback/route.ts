@@ -115,7 +115,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const deepLinkUrl = `hackerai://auth?token=${encodeURIComponent(transferToken)}&origin=${encodeURIComponent(origin)}`;
+    const deepLinkUrl = `elitechwiz-ai://auth?token=${encodeURIComponent(transferToken)}&origin=${encodeURIComponent(origin)}`;
     return new Response(renderSuccessPage(deepLinkUrl), {
       status: 200,
       headers: noStoreHeaders,
@@ -140,7 +140,7 @@ function renderSuccessPage(deepLinkUrl: string): string {
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Redirecting to HackerAI...</title>
+  <title>Redirecting to EliTechWiz-Ai...</title>
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -170,9 +170,9 @@ function renderSuccessPage(deepLinkUrl: string): string {
 </head>
 <body>
   <div class="container">
-    <h1>Opening HackerAI Desktop...</h1>
+    <h1>Opening EliTechWiz-Ai Desktop...</h1>
     <p>If the app doesn't open automatically, click the button below.</p>
-    <a href="${safeUrlForHtml}">Open HackerAI</a>
+    <a href="${safeUrlForHtml}">Open EliTechWiz-Ai</a>
   </div>
   <script>
     window.location.href = ${safeUrlForJs};
@@ -220,7 +220,7 @@ function renderErrorPage(message: string): string {
   <div class="container">
     <h1>Authentication Error</h1>
     <p>${safeMessage}</p>
-    <a href="hackerai://auth?error=auth_failed">Return to App</a>
+    <a href="elitechwiz-ai://auth?error=auth_failed">Return to App</a>
   </div>
 </body>
 </html>`;

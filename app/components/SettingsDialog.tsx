@@ -17,7 +17,7 @@ import {
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 // import { ManageMemoriesDialog } from "@/app/components/ManageMemoriesDialog";
 import { ManageNotesDialog } from "@/app/components/ManageNotesDialog";
-import { CustomizeHackerAIDialog } from "@/app/components/CustomizeHackerAIDialog";
+import { CustomizeEliTechWizAiDialog } from "@/app/components/CustomizeEliTechWizAiDialog";
 import { SecurityTab } from "@/app/components/SecurityTab";
 import { PersonalizationTab } from "@/app/components/PersonalizationTab";
 import { AccountTab } from "@/app/components/AccountTab";
@@ -255,8 +255,8 @@ const SettingsDialog = ({
         onOpenChange={setShowNotesDialog}
       />
 
-      {/* Customize HackerAI Dialog */}
-      <CustomizeHackerAIDialog
+      {/* Customize EliTechWiz-Ai Dialog */}
+      <CustomizeEliTechWizAiDialog
         open={showCustomizeDialog}
         onOpenChange={setShowCustomizeDialog}
       />
