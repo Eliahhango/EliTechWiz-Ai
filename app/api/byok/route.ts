@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import { getUserIDAndPro } from "@/lib/auth/get-user-id";
 import { isUnauthorizedError } from "@/lib/api/response";
+import { getConvexHttpClient, getConvexServiceRoleKey } from "@/lib/convex/server";
 import {
   clearByokApiKey,
   getByokApiKeyHint,
@@ -12,9 +12,8 @@ import {
 import { getUserCustomization } from "@/lib/db/actions";
 
 async function setByokEnabled(userId: string, enabled: boolean): Promise<void> {
-  const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
-  await convex.mutation(api.userCustomization.setByokEnabledForBackend, {
-    serviceKey: process.env.CONVEX_SERVICE_ROLE_KEY!,
+  await getConvexHttpClient().mutation(api.userCustomization.setByokEnabledForBackend, {
+    serviceKey: getConvexServiceRoleKey(),
     userId,
     enabled,
   });

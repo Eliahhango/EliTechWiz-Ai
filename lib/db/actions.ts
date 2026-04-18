@@ -2,7 +2,7 @@ import "server-only";
 
 import { api } from "@/convex/_generated/api";
 import { ChatSDKError } from "../errors";
-import { ConvexHttpClient } from "convex/browser";
+import { getConvexHttpClient } from "@/lib/convex/server";
 import { UIMessage, UIMessagePart } from "ai";
 import { extractFileIdsFromParts } from "@/lib/utils/file-token-utils";
 import {
@@ -22,12 +22,12 @@ import { v4 as uuidv4 } from "uuid";
 import { AGENT_RESUME_PREAMBLE } from "@/lib/chat/summarization/prompts";
 import { isAgentMode } from "@/lib/utils/mode-helpers";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+const getConvex = () => getConvexHttpClient();
 const serviceKey = process.env.CONVEX_SERVICE_ROLE_KEY!;
 
 export async function getChatById({ id }: { id: string }) {
   try {
-    const selectedChat = await convex.query(api.chats.getChatById, {
+    const selectedChat = await getConvex().query(api.chats.getChatById, {
       serviceKey,
       id,
     });
@@ -47,7 +47,7 @@ export async function saveChat({
   title: string;
 }) {
   try {
-    return await convex.mutation(api.chats.saveChat, {
+    return await getConvex().mutation(api.chats.saveChat, {
       serviceKey,
       id,
       userId,
@@ -98,7 +98,7 @@ export async function saveMessage({
       ...((extraFileIds || []).filter(Boolean) as string[]),
     ];
 
-    return await convex.mutation(api.messages.saveMessage, {
+    return await getConvex().mutation(api.messages.saveMessage, {
       serviceKey,
       id: message.id,
       chatId,
@@ -207,7 +207,7 @@ export async function updateChat({
   selectedModel?: string;
 }) {
   try {
-    return await convex.mutation(api.chats.updateChat, {
+    return await getConvex().mutation(api.chats.updateChat, {
       serviceKey,
       chatId,
       title,
@@ -280,7 +280,7 @@ export async function getMessagesByChatId({
             page: UIMessage[];
             isDone: boolean;
             continueCursor: string | null;
-          } = await convex.query(api.messages.getMessagesPageForBackend, {
+          } = await getConvex().query(api.messages.getMessagesPageForBackend, {
             serviceKey,
             chatId,
             userId,
@@ -508,7 +508,7 @@ export async function getMessagesByChatId({
 
 export async function getUserCustomization({ userId }: { userId: string }) {
   try {
-    const userCustomization = await convex.query(
+    const userCustomization = await getConvex().query(
       api.userCustomization.getUserCustomizationForBackend,
       {
         serviceKey,
@@ -530,7 +530,7 @@ export async function getUserCustomization({ userId }: { userId: string }) {
 //   subscription: SubscriptionTier;
 // }) {
 //   try {
-//     const memories = await convex.query(api.memories.getMemoriesForBackend, {
+//     const memories = await getConvex().query(api.memories.getMemoriesForBackend, {
 //       serviceKey,
 //       userId,
 //       subscription,
@@ -549,7 +549,7 @@ export async function getUserCustomization({ userId }: { userId: string }) {
 
 // export async function getMemoryById({ memoryId }: { memoryId: string }) {
 //   try {
-//     const memory = await convex.query(api.memories.getMemoryByIdForBackend, {
+//     const memory = await getConvex().query(api.memories.getMemoryByIdForBackend, {
 //       serviceKey,
 //       memoryId,
 //     });
@@ -570,7 +570,7 @@ export async function startStream({
   streamId: string;
 }) {
   try {
-    await convex.mutation(api.chatStreams.startStream, {
+    await getConvex().mutation(api.chatStreams.startStream, {
       serviceKey,
       chatId,
       streamId,
@@ -583,7 +583,7 @@ export async function startStream({
 
 export async function prepareForNewStream({ chatId }: { chatId: string }) {
   try {
-    await convex.mutation(api.chatStreams.prepareForNewStream, {
+    await getConvex().mutation(api.chatStreams.prepareForNewStream, {
       serviceKey,
       chatId,
     });
@@ -598,7 +598,7 @@ export async function prepareForNewStream({ chatId }: { chatId: string }) {
 
 export async function getCancellationStatus({ chatId }: { chatId: string }) {
   try {
-    const status = await convex.query(api.chatStreams.getCancellationStatus, {
+    const status = await getConvex().query(api.chatStreams.getCancellationStatus, {
       serviceKey,
       chatId,
     });
@@ -618,7 +618,7 @@ export async function startTempStream({
   userId: string;
 }) {
   try {
-    await convex.mutation(api.tempStreams.startTempStream, {
+    await getConvex().mutation(api.tempStreams.startTempStream, {
       serviceKey,
       chatId,
       userId,
@@ -634,7 +634,7 @@ export async function getTempCancellationStatus({
   chatId: string;
 }) {
   try {
-    return await convex.query(api.tempStreams.getTempCancellationStatus, {
+    return await getConvex().query(api.tempStreams.getTempCancellationStatus, {
       serviceKey,
       chatId,
     });
@@ -649,7 +649,7 @@ export async function deleteTempStreamForBackend({
   chatId: string;
 }) {
   try {
-    await convex.mutation(api.tempStreams.deleteTempStreamForBackend, {
+    await getConvex().mutation(api.tempStreams.deleteTempStreamForBackend, {
       serviceKey,
       chatId,
     });
@@ -669,7 +669,7 @@ export async function deleteTempStreamForBackend({
 // }) {
 //   try {
 //     const finalMemoryId = memoryId || generateMemoryId();
-//     const returnedId = await convex.mutation(
+//     const returnedId = await getConvex().mutation(
 //       api.memories.createMemoryForBackend,
 //       {
 //         serviceKey,
@@ -697,7 +697,7 @@ export async function deleteTempStreamForBackend({
 //   content: string;
 // }) {
 //   try {
-//     await convex.mutation(api.memories.updateMemoryForBackend, {
+//     await getConvex().mutation(api.memories.updateMemoryForBackend, {
 //       serviceKey,
 //       userId,
 //       memoryId,
@@ -720,7 +720,7 @@ export async function deleteTempStreamForBackend({
 //   memoryId: string;
 // }) {
 //   try {
-//     await convex.mutation(api.memories.deleteMemoryForBackend, {
+//     await getConvex().mutation(api.memories.deleteMemoryForBackend, {
 //       serviceKey,
 //       userId,
 //       memoryId,
@@ -744,7 +744,7 @@ export async function saveChatSummary({
   summaryUpToMessageId: string;
 }) {
   try {
-    await convex.mutation(api.chats.saveLatestSummary, {
+    await getConvex().mutation(api.chats.saveLatestSummary, {
       serviceKey,
       chatId,
       summaryText,
@@ -773,7 +773,7 @@ export async function saveChatSummary({
 
 export async function getLatestSummary({ chatId }: { chatId: string }) {
   try {
-    const summary = await convex.query(api.chats.getLatestSummaryForBackend, {
+    const summary = await getConvex().query(api.chats.getLatestSummaryForBackend, {
       serviceKey,
       chatId,
     });
@@ -802,7 +802,7 @@ export async function createNote({
   tags?: string[];
 }) {
   try {
-    const result = await convex.mutation(api.notes.createNoteForBackend, {
+    const result = await getConvex().mutation(api.notes.createNoteForBackend, {
       serviceKey,
       userId,
       title,
@@ -831,7 +831,7 @@ export async function listNotes({
   search?: string;
 }) {
   try {
-    const result = await convex.query(api.notes.listNotesForBackend, {
+    const result = await getConvex().query(api.notes.listNotesForBackend, {
       serviceKey,
       userId,
       category,
@@ -861,7 +861,7 @@ export async function updateNote({
   tags?: string[];
 }) {
   try {
-    const result = await convex.mutation(api.notes.updateNoteForBackend, {
+    const result = await getConvex().mutation(api.notes.updateNoteForBackend, {
       serviceKey,
       userId,
       noteId,
@@ -886,7 +886,7 @@ export async function deleteNote({
   noteId: string;
 }) {
   try {
-    const result = await convex.mutation(api.notes.deleteNoteForBackend, {
+    const result = await getConvex().mutation(api.notes.deleteNoteForBackend, {
       serviceKey,
       userId,
       noteId,
@@ -908,7 +908,7 @@ export async function getNotes({
   subscription: SubscriptionTier;
 }) {
   try {
-    const notes = await convex.query(api.notes.getNotesForBackend, {
+    const notes = await getConvex().query(api.notes.getNotesForBackend, {
       serviceKey,
       userId,
       subscription,
@@ -946,7 +946,7 @@ export async function logUsageRecord({
   maxMode?: boolean;
 }) {
   try {
-    await convex.mutation(api.usageLogs.logUsage, {
+    await getConvex().mutation(api.usageLogs.logUsage, {
       serviceKey,
       user_id: userId,
       model,

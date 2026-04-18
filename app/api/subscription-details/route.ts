@@ -3,11 +3,11 @@ import { workos } from "../workos";
 import { getUserID } from "@/lib/auth/get-user-id";
 import { NextRequest, NextResponse } from "next/server";
 import { SubscriptionTier } from "@/types/chat";
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
+import { getConvexHttpClient } from "@/lib/convex/server";
 import { getSuspensionMessage } from "@/lib/suspensionMessage";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+const getConvex = () => getConvexHttpClient();
 
 export const POST = async (req: NextRequest) => {
   try {
@@ -66,7 +66,7 @@ export const POST = async (req: NextRequest) => {
 
     // Reject customers with too many recent payment failures (card-testing)
     try {
-      const fraudCheck = await convex.query(
+      const fraudCheck = await getConvex().query(
         api.fraudTracking.isCustomerSuspicious,
         {
           serviceKey: process.env.CONVEX_SERVICE_ROLE_KEY!,

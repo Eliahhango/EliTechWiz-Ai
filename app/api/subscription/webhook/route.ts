@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/app/api/stripe";
 import { workos } from "@/app/api/workos";
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
+import { getConvexHttpClient } from "@/lib/convex/server";
 import Stripe from "stripe";
 import {
   resetRateLimitBuckets,
@@ -13,7 +13,7 @@ import {
 } from "@/lib/rate-limit";
 import type { SubscriptionTier } from "@/types";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+const getConvex = () => getConvexHttpClient();
 
 // =============================================================================
 // Tier Resolution
@@ -357,7 +357,7 @@ export async function POST(req: NextRequest) {
 
   // Idempotency check (check only — mark after successful processing)
   try {
-    const result = await convex.mutation(api.extraUsage.checkAndMarkWebhook, {
+    const result = await getConvex().mutation(api.extraUsage.checkAndMarkWebhook, {
       serviceKey: process.env.CONVEX_SERVICE_ROLE_KEY!,
       eventId: event.id,
       checkOnly: true,
@@ -397,7 +397,7 @@ export async function POST(req: NextRequest) {
 
   // Mark as processed after successful handling
   try {
-    await convex.mutation(api.extraUsage.checkAndMarkWebhook, {
+    await getConvex().mutation(api.extraUsage.checkAndMarkWebhook, {
       serviceKey: process.env.CONVEX_SERVICE_ROLE_KEY!,
       eventId: event.id,
     });

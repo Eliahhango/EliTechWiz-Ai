@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/app/api/stripe";
-import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
+import { getConvexHttpClient } from "@/lib/convex/server";
 import Stripe from "stripe";
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
+const getConvex = () => getConvexHttpClient();
 
 // =============================================================================
 // Helpers
@@ -387,7 +387,7 @@ async function handlePaymentFailed(
     // Persist block to Convex FIRST so that isCustomerSuspicious pre-checks
     // will see it even if the subsequent Stripe calls fail and the webhook
     // retry is skipped (idempotency claim already written above).
-    await convex.mutation(api.fraudTracking.markCustomerAutoBlocked, {
+    await getConvex().mutation(api.fraudTracking.markCustomerAutoBlocked, {
       serviceKey: process.env.CONVEX_SERVICE_ROLE_KEY!,
       stripeCustomerId: customerId,
       reason: `immediate_block:${declineCode}`,
@@ -422,7 +422,7 @@ async function handlePaymentFailed(
   ]);
 
   // Track suspicious failure in sliding window (multi-signal)
-  const result = await convex.mutation(api.fraudTracking.recordPaymentFailure, {
+  const result = await getConvex().mutation(api.fraudTracking.recordPaymentFailure, {
     serviceKey: process.env.CONVEX_SERVICE_ROLE_KEY!,
     stripeCustomerId: customerId,
     declineCode,
@@ -495,7 +495,7 @@ export async function POST(req: NextRequest) {
   // Stripe operations below are idempotent, so duplicate runs are safe
   // if the claim write succeeds but processing partially fails.
   try {
-    const result = await convex.mutation(api.extraUsage.checkAndMarkWebhook, {
+    const result = await getConvex().mutation(api.extraUsage.checkAndMarkWebhook, {
       serviceKey: process.env.CONVEX_SERVICE_ROLE_KEY!,
       eventId: event.id,
     });
