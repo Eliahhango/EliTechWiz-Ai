@@ -1,0 +1,676 @@
+/**
+ * Chat Stream Helpers
+ *
+ * Utility functions extracted from chat-handler to keep it clean and focused.
+ */
+
+import type {
+  LanguageModel,
+  UIMessage,
+  UIMessageStreamWriter,
+  ToolSet,
+  ModelMessage,
+  SystemModelMessage,
+} from "ai";
+import type { ChatMode, SubscriptionTier, Todo } from "@/types";
+import { isAnthropicModel } from "@/lib/ai/providers";
+import type { ContextUsageData } from "@/app/components/ContextUsageIndicator";
+import type { Id } from "@/convex/_generated/dataModel";
+import type { UIMessagePart } from "ai";
+import {
+  writeRateLimitWarning,
+  createSummarizationCompletedPart,
+  findSummarizationInsertIndex,
+} from "@/lib/utils/stream-writer-utils";
+import { POINTS_PER_DOLLAR } from "@/lib/rate-limit/token-bucket";
+import { countMessagesTokens } from "@/lib/token-utils";
+import {
+  checkAndSummarizeIfNeeded,
+  type EnsureSandbox,
+  type SummarizationUsage,
+} from "@/lib/chat/summarization";
+import { getNotes } from "@/lib/db/actions";
+import { generateNotesSection } from "@/lib/system-prompt/notes";
+import { logger } from "@/lib/logger";
+import { UsageTracker } from "@/lib/usage-tracker";
+
+/**
+ * Check if messages contain file attachments
+ */
+export function hasFileAttachments(
+  messages: Array<{ parts?: Array<{ type?: string }> }>,
+): boolean {
+  return messages.some((msg) =>
+    msg.parts?.some((part) => part.type === "file"),
+  );
+}
+
+/**
+ * Count total file attachments and how many are images
+ */
+export function countFileAttachments(
+  messages: Array<{ parts?: Array<{ type?: string; mediaType?: string }> }>,
+): { totalFiles: number; imageCount: number } {
+  let totalFiles = 0;
+  let imageCount = 0;
+
+  for (const msg of messages) {
+    if (!msg.parts) continue;
+    for (const part of msg.parts) {
+      if (part.type !== "file") continue;
+      totalFiles++;
+      if ((part.mediaType ?? "").startsWith("image/")) {
+        imageCount++;
+      }
+    }
+  }
+
+  return { totalFiles, imageCount };
+}
+
+/**
+ * Send rate limit warnings based on subscription and rate limit info
+ */
+export function sendRateLimitWarnings(
+  writer: UIMessageStreamWriter,
+  options: {
+    subscription: SubscriptionTier;
+    mode: ChatMode;
+    rateLimitInfo: {
+      remaining: number;
+      limit: number;
+      resetTime: Date;
+      monthly?: { remaining: number; limit: number; resetTime: Date };
+      extraUsagePointsDeducted?: number;
+      rateLimitSkipped?: boolean;
+    };
+  },
+): void {
+  const { subscription, mode, rateLimitInfo } = options;
+
+  if (subscription === "free") {
+    // Warn when roughly 30% of daily limit remains (minimum threshold of 1)
+    const warningThreshold = Math.max(1, Math.ceil(rateLimitInfo.limit * 0.3));
+    if (
+      !rateLimitInfo.rateLimitSkipped &&
+      rateLimitInfo.remaining <= warningThreshold
+    ) {
+      writeRateLimitWarning(writer, {
+        warningType: "sliding-window",
+        remaining: rateLimitInfo.remaining,
+        resetTime: rateLimitInfo.resetTime.toISOString(),
+        mode,
+        subscription,
+      });
+    }
+  } else if (rateLimitInfo.monthly) {
+    // Paid users with extra usage: warn when extra usage is being used
+    if (
+      rateLimitInfo.extraUsagePointsDeducted &&
+      rateLimitInfo.extraUsagePointsDeducted > 0
+    ) {
+      writeRateLimitWarning(writer, {
+        warningType: "extra-usage-active",
+        bucketType: "monthly",
+        resetTime: rateLimitInfo.monthly.resetTime.toISOString(),
+        subscription,
+      });
+    } else {
+      // Paid users without extra usage: warn at 80% and 95%
+      const monthlyPercent =
+        (rateLimitInfo.monthly.remaining / rateLimitInfo.monthly.limit) * 100;
+      const usedPercent = 100 - monthlyPercent;
+
+      if (usedPercent >= 80) {
+        const severity: "info" | "warning" =
+          usedPercent >= 95 ? "warning" : "info";
+
+        const usedDollars =
+          (rateLimitInfo.monthly.limit - rateLimitInfo.monthly.remaining) /
+          POINTS_PER_DOLLAR;
+        const limitDollars = rateLimitInfo.monthly.limit / POINTS_PER_DOLLAR;
+
+        writeRateLimitWarning(writer, {
+          warningType: "token-bucket",
+          bucketType: "monthly",
+          remainingPercent: Math.round(monthlyPercent),
+          resetTime: rateLimitInfo.monthly.resetTime.toISOString(),
+          subscription,
+          severity,
+          usedDollars: Math.round(usedDollars * 100) / 100,
+          limitDollars: Math.round(limitDollars * 100) / 100,
+        });
+      }
+    }
+  }
+}
+
+/**
+ * Check if an error is an xAI safety check error (403 from api.x.ai)
+ * These are false positives that should be suppressed from logging
+ */
+export function isXaiSafetyError(error: unknown): boolean {
+  if (!error || typeof error !== "object") {
+    return false;
+  }
+
+  // Handle both direct errors (from generateText) and wrapped errors (from streamText onError)
+  const apiError =
+    "error" in error && error.error instanceof Error
+      ? (error.error as Error & {
+          statusCode?: number;
+          url?: string;
+          responseBody?: string;
+        })
+      : (error as Error & {
+          statusCode?: number;
+          url?: string;
+          responseBody?: string;
+        });
+
+  return (
+    apiError.statusCode === 403 &&
+    typeof apiError.url === "string" &&
+    apiError.url.includes("api.x.ai") &&
+    typeof apiError.responseBody === "string"
+  );
+}
+
+/**
+ * Check if an error is a provider API error that should trigger fallback
+ * Specifically targets Google/Gemini INVALID_ARGUMENT errors
+ */
+export function isProviderApiError(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+
+  const err = error as {
+    statusCode?: number;
+    responseBody?: string;
+    data?: {
+      error?: {
+        code?: number;
+        message?: string;
+        metadata?: { raw?: string; provider_name?: string };
+      };
+    };
+  };
+
+  // Must be a 400 error
+  if (err.statusCode !== 400 && err.data?.error?.code !== 400) return false;
+
+  // Check for INVALID_ARGUMENT in response body or nested metadata
+  const responseBody = err.responseBody || "";
+  const rawMetadata = err.data?.error?.metadata?.raw || "";
+  const combined = responseBody + rawMetadata;
+
+  return combined.includes("INVALID_ARGUMENT");
+}
+
+/**
+ * Compute total context usage from messages.
+ */
+export function computeContextUsage(
+  messages: UIMessage[],
+  fileTokens: Record<Id<"files">, number>,
+  systemTokens: number,
+  maxTokens: number,
+): ContextUsageData {
+  const usedTokens = systemTokens + countMessagesTokens(messages, fileTokens);
+  return { usedTokens, maxTokens };
+}
+
+export function isContextUsageEnabled(
+  subscription: SubscriptionTier,
+  mode?: "ask" | "agent",
+): boolean {
+  if (subscription !== "free") return true;
+  return mode === "agent";
+}
+
+/**
+ * Write a context usage data stream part to the client.
+ */
+export function writeContextUsage(
+  writer: UIMessageStreamWriter,
+  usage: ContextUsageData,
+): void {
+  writer.write({ type: "data-context-usage", data: usage });
+}
+
+export interface SummarizationStepResult {
+  needsSummarization: boolean;
+  summarizedMessages?: UIMessage[];
+  contextUsage?: ContextUsageData;
+  summarizationUsage?: SummarizationUsage;
+}
+
+export async function runSummarizationStep(options: {
+  messages: UIMessage[];
+  subscription: SubscriptionTier;
+  languageModel: LanguageModel;
+  mode: ChatMode;
+  writer: UIMessageStreamWriter;
+  chatId: string | null;
+  fileTokens: Record<Id<"files">, number>;
+  todos: Todo[];
+  abortSignal?: AbortSignal;
+  ensureSandbox?: EnsureSandbox;
+  systemPromptTokens: number;
+  ctxSystemTokens: number;
+  ctxMaxTokens: number;
+  providerInputTokens?: number;
+  chatSystemPrompt: string;
+  tools?: ToolSet;
+  providerOptions?: Record<string, Record<string, unknown>>;
+  modelMessages?: ModelMessage[];
+}): Promise<SummarizationStepResult> {
+  const { needsSummarization, summarizedMessages, summarizationUsage } =
+    await checkAndSummarizeIfNeeded(
+      options.messages,
+      options.subscription,
+      options.languageModel,
+      options.mode,
+      options.writer,
+      options.chatId,
+      options.fileTokens,
+      options.todos,
+      options.abortSignal,
+      options.ensureSandbox,
+      options.systemPromptTokens,
+      options.providerInputTokens ?? 0,
+      options.chatSystemPrompt,
+      options.tools,
+      options.providerOptions,
+      options.modelMessages,
+    );
+
+  if (!needsSummarization) {
+    return { needsSummarization: false };
+  }
+
+  const contextUsage = isContextUsageEnabled(options.subscription, options.mode)
+    ? computeContextUsage(
+        summarizedMessages,
+        options.fileTokens,
+        options.ctxSystemTokens,
+        options.ctxMaxTokens,
+      )
+    : undefined;
+
+  if (contextUsage) {
+    writeContextUsage(options.writer, contextUsage);
+  }
+
+  return {
+    needsSummarization: true,
+    summarizedMessages,
+    contextUsage,
+    summarizationUsage,
+  };
+}
+
+/**
+ * Tracks summarization state and handles inserting the summarization badge
+ * into message parts at the correct position during save.
+ */
+export class SummarizationTracker {
+  hasSummarized = false;
+  private parts: UIMessagePart<any, any>[] = [];
+  private atStep: number | undefined;
+
+  /**
+   * Record that summarization completed at the given step and accumulate
+   * usage into the provided UsageTracker.
+   */
+  recordSummarization(
+    stepNumber: number,
+    usage: SummarizationUsage | undefined,
+    usageTracker: UsageTracker,
+  ): void {
+    this.hasSummarized = true;
+    this.atStep = stepNumber;
+    this.parts.push(createSummarizationCompletedPart());
+
+    if (usage) {
+      usageTracker.inputTokens += usage.inputTokens;
+      usageTracker.outputTokens += usage.outputTokens;
+      usageTracker.summarizationOutputTokens += usage.outputTokens;
+      usageTracker.cacheReadTokens += usage.cacheReadTokens || 0;
+      usageTracker.cacheWriteTokens += usage.cacheWriteTokens || 0;
+      if (usage.cost) {
+        usageTracker.providerCost += usage.cost;
+      }
+    }
+  }
+
+  /**
+   * Insert summarization parts into an assistant message at the correct
+   * position (before the step-start for the step where summarization happened).
+   * Returns the original message unchanged if no summarization occurred.
+   */
+  processMessageForSave<T extends { role: string; parts: any[] }>(
+    message: T,
+  ): T {
+    if (message.role !== "assistant" || this.parts.length === 0) {
+      return message;
+    }
+    const parts = [...message.parts];
+    const idx = findSummarizationInsertIndex(parts, this.atStep ?? 0);
+    parts.splice(idx, 0, ...this.parts);
+    return { ...message, parts };
+  }
+}
+
+/**
+ * Build provider options for streamText
+ */
+export function buildProviderOptions(
+  isReasoningModel: boolean,
+  subscription: SubscriptionTier,
+  userId?: string,
+) {
+  return {
+    openrouter: {
+      ...(isReasoningModel
+        ? { reasoning: { enabled: true } }
+        : { reasoning: { enabled: false } }),
+      ...(userId && { user: userId }),
+      // provider: {
+      //   ...(subscription === "free" ? { sort: "price" } : { sort: "latency" }),
+      // },
+    },
+  } as const;
+}
+
+const ANTHROPIC_CACHE_BREAKPOINT = {
+  openrouter: { cacheControl: { type: "ephemeral" as const } },
+};
+
+/**
+ * Build a system prompt with an Anthropic cache breakpoint.
+ * Returns a structured system message for Anthropic models, plain string otherwise.
+ */
+export function buildSystemPrompt(
+  systemPrompt: string,
+  modelName: string,
+): string | SystemModelMessage {
+  if (!isAnthropicModel(modelName)) return systemPrompt;
+  return {
+    role: "system",
+    content: systemPrompt,
+    providerOptions: ANTHROPIC_CACHE_BREAKPOINT,
+  } satisfies SystemModelMessage;
+}
+
+/**
+ * Add an Anthropic cache breakpoint to the last user message.
+ * This tells Anthropic to cache everything up to and including that message,
+ * maximizing cache hits on subsequent agentic steps.
+ */
+export function addCacheBreakpointToLastUserMessage<
+  T extends Array<Record<string, unknown>>,
+>(messages: T, modelName: string): T {
+  if (!isAnthropicModel(modelName)) return messages;
+  const result = [...messages] as T;
+  for (let i = result.length - 1; i >= 0; i--) {
+    if (result[i].role === "user") {
+      result[i] = {
+        ...result[i],
+        providerOptions: {
+          ...((result[i].providerOptions as Record<string, unknown>) || {}),
+          ...ANTHROPIC_CACHE_BREAKPOINT,
+        },
+      };
+      break;
+    }
+  }
+  return result;
+}
+
+/**
+ * Appends a <system-reminder> block to the last user message's text part.
+ * Returns a new array (does not mutate input).
+ */
+export function appendSystemReminderToLastUserMessage(
+  messages: UIMessage[],
+  reminderContent: string,
+): UIMessage[] {
+  const result = [...messages];
+  for (let i = result.length - 1; i >= 0; i--) {
+    if (result[i].role === "user") {
+      const parts = [...(result[i].parts || [])];
+      const textPartIndex = parts.findIndex((p) => p.type === "text");
+
+      if (textPartIndex >= 0) {
+        const textPart = parts[textPartIndex] as { type: "text"; text: string };
+        parts[textPartIndex] = {
+          ...textPart,
+          text: `${textPart.text}\n\n<system-reminder>\n${reminderContent}\n</system-reminder>`,
+        };
+      } else {
+        parts.push({
+          type: "text" as const,
+          text: `<system-reminder>\n${reminderContent}\n</system-reminder>`,
+        });
+      }
+
+      result[i] = { ...result[i], parts };
+      break;
+    }
+  }
+  return result;
+}
+
+/**
+ * Fetches user notes and injects them into messages via <system-reminder>.
+ * Returns the (possibly updated) messages array.
+ */
+export async function injectNotesIntoMessages(
+  messages: UIMessage[],
+  opts: {
+    userId: string;
+    subscription: SubscriptionTier;
+    shouldIncludeNotes: boolean;
+    isTemporary?: boolean;
+  },
+): Promise<UIMessage[]> {
+  if (!opts.shouldIncludeNotes || opts.isTemporary) return messages;
+
+  try {
+    const notes = await getNotes({
+      userId: opts.userId,
+      subscription: opts.subscription,
+    });
+    const notesContent = generateNotesSection(notes);
+    if (!notesContent) return messages;
+
+    return appendSystemReminderToLastUserMessage(messages, notesContent);
+  } catch (error) {
+    logger.warn("Failed to fetch notes, continuing without them", {
+      userId: opts.userId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return messages;
+  }
+}
+
+// Regex to match a system-reminder block that contains <notes>.
+// Uses \s* instead of literal \n so it stays in sync even if the
+// template strings in appendSystemReminderToLastUserMessage or
+// generateNotesSection change their whitespace slightly.
+const NOTES_REMINDER_REGEX =
+  /<system-reminder>\s*<notes>[\s\S]*?<\/notes>\s*<\/system-reminder>/;
+
+/**
+ * Replaces the notes <system-reminder> block inside a text string.
+ * Returns the original string unchanged if no notes block is found.
+ */
+export function replaceNotesBlock(
+  text: string,
+  newNotesContent: string,
+): string {
+  if (NOTES_REMINDER_REGEX.test(text)) {
+    return newNotesContent
+      ? text.replace(
+          NOTES_REMINDER_REGEX,
+          `<system-reminder>\n${newNotesContent}\n</system-reminder>`,
+        )
+      : text.replace(NOTES_REMINDER_REGEX, "");
+  }
+  return text;
+}
+
+/**
+ * Updates the notes in model messages (CoreMessage[]) from prepareStep.
+ * Preserves full conversation history (tool calls, results, assistant messages).
+ *
+ * The AI SDK does NOT preserve `<system-reminder>` text that was injected into
+ * user messages via `appendSystemReminderToLastUserMessage`. So on subsequent
+ * agentic steps, the notes block will be missing from prepareStep's messages.
+ *
+ * Strategy:
+ * 1. Try to find and replace an existing `<notes>` block (in case the SDK
+ *    does preserve it in some path).
+ * 2. If no block is found, append the notes as a new `<system-reminder>` to
+ *    the last user message — this ensures the model always sees fresh notes.
+ */
+export async function refreshNotesInModelMessages(
+  messages: Array<Record<string, unknown>>,
+  opts: {
+    userId: string;
+    subscription: SubscriptionTier;
+    shouldIncludeNotes: boolean;
+    isTemporary?: boolean;
+  },
+): Promise<Array<Record<string, unknown>>> {
+  if (!opts.shouldIncludeNotes || opts.isTemporary) return messages;
+
+  try {
+    const notes = await getNotes({
+      userId: opts.userId,
+      subscription: opts.subscription,
+    });
+    const newNotesContent = generateNotesSection(notes);
+
+    logger.warn("Notes refreshed in model messages (prepareStep)", {
+      userId: opts.userId,
+      noteCount: notes?.length ?? 0,
+    });
+
+    // First pass: try to replace (or remove) an existing notes block.
+    // replaceNotesBlock handles empty newNotesContent by removing the block.
+    const result = [...messages];
+    for (let i = result.length - 1; i >= 0; i--) {
+      const msg = result[i];
+      if (msg.role !== "user") continue;
+
+      const content = msg.content;
+
+      if (typeof content === "string") {
+        const updated = replaceNotesBlock(content, newNotesContent);
+        if (updated !== content) {
+          result[i] = { ...msg, content: updated };
+          return result;
+        }
+      } else if (Array.isArray(content)) {
+        const parts = [...(content as Array<Record<string, unknown>>)];
+        for (let j = 0; j < parts.length; j++) {
+          if (parts[j].type !== "text") continue;
+          const text = parts[j].text as string;
+          const updated = replaceNotesBlock(text, newNotesContent);
+          if (updated !== text) {
+            parts[j] = { ...parts[j], text: updated };
+            result[i] = { ...msg, content: parts };
+            return result;
+          }
+        }
+      }
+    }
+
+    // Nothing to append if user has no notes (and no existing block to remove)
+    if (!newNotesContent) return messages;
+
+    // No existing notes block found (AI SDK strips <system-reminder> from its
+    // internal message state). Append the notes to the last user message.
+    return appendReminderToModelMessages(result, newNotesContent);
+  } catch (error) {
+    logger.warn("Failed to refresh notes in prepareStep, continuing without", {
+      userId: opts.userId,
+      error: error instanceof Error ? error.message : String(error),
+    });
+    return messages;
+  }
+}
+
+/**
+ * Appends a <system-reminder> block to the last user message in a CoreMessage array.
+ * Used in prepareStep to inject runtime reminders without mutating the original.
+ */
+export function appendReminderToModelMessages(
+  messages: Array<Record<string, unknown>>,
+  reminderText: string,
+): Array<Record<string, unknown>> {
+  const result = [...messages];
+  const reminder = `<system-reminder>\n${reminderText}\n</system-reminder>`;
+  for (let i = result.length - 1; i >= 0; i--) {
+    const msg = result[i];
+    if (msg.role !== "user") continue;
+    const content = msg.content;
+    if (typeof content === "string") {
+      result[i] = { ...msg, content: `${content}\n\n${reminder}` };
+    } else if (Array.isArray(content)) {
+      const parts = [...content];
+      const textIdx = parts.findLastIndex(
+        (p: unknown) => (p as Record<string, unknown>).type === "text",
+      );
+      if (textIdx >= 0) {
+        const part = parts[textIdx] as Record<string, unknown>;
+        parts[textIdx] = {
+          ...part,
+          text: `${part.text as string}\n\n${reminder}`,
+        };
+      } else {
+        parts.push({ type: "text", text: reminder });
+      }
+      result[i] = { ...msg, content: parts };
+    }
+    break;
+  }
+  return result;
+}
+
+/**
+ * Shared logic for the post-prune section of prepareStep in both
+ * chat-handler.ts and agent-task.ts: refreshes notes if a note tool
+ * was used.
+ */
+export async function applyPrepareStepReminders(
+  messages: Array<Record<string, unknown>>,
+  opts: {
+    toolResults: unknown[];
+    noteInjectionOpts: {
+      userId: string;
+      subscription: SubscriptionTier;
+      shouldIncludeNotes: boolean;
+      isTemporary?: boolean;
+    };
+  },
+): Promise<Array<Record<string, unknown>>> {
+  // Refresh notes if a note tool was used
+  const wasNoteModified =
+    Array.isArray(opts.toolResults) &&
+    opts.toolResults.some((r) =>
+      ["create_note", "update_note", "delete_note"].includes(
+        (r as { toolName?: string })?.toolName ?? "",
+      ),
+    );
+
+  if (wasNoteModified) {
+    return (await refreshNotesInModelMessages(
+      messages,
+      opts.noteInjectionOpts,
+    )) as Array<Record<string, unknown>>;
+  }
+
+  return messages;
+}
