@@ -1,7 +1,15 @@
 import { Axiom } from "@axiomhq/js";
 
-const axiomClient = new Axiom({
-  token: process.env.AXIOM_TOKEN!,
-});
+let axiomClient: Axiom | null = null;
 
-export default axiomClient;
+export default function getAxiomClient(): Axiom | null {
+  if (axiomClient) return axiomClient;
+  const token = process.env.AXIOM_TOKEN;
+  if (!token) return null;
+  try {
+    axiomClient = new Axiom({ token });
+    return axiomClient;
+  } catch {
+    return null;
+  }
+}

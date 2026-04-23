@@ -4,7 +4,7 @@
  * code that may not run in isolated runtimes.
  */
 
-import axiomClient from "@/lib/axiom/axiom";
+import getAxiomClient from "@/lib/axiom/axiom";
 import { Logger, AxiomJSTransport } from "@axiomhq/logging";
 import type { Formatter } from "@axiomhq/logging";
 import { classifyE2BError } from "@/lib/ai/tools/utils/e2b-errors";
@@ -26,6 +26,8 @@ function getWorkerLogger(): Logger | null {
   const token = process.env.AXIOM_TOKEN;
   const dataset = process.env.AXIOM_DATASET;
   if (!token || !dataset) return null;
+  const axiomClient = getAxiomClient();
+  if (!axiomClient) return null;
   try {
     _workerLogger = new Logger({
       transports: [
