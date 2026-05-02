@@ -1,0 +1,45 @@
+{
+  "name": "@elitechwiz-ai/local",
+  "version": "0.7.2",
+  "description": "EliTechWiz-Ai Local Sandbox Client - Execute commands on your local machine",
+  "bin": {
+    "elitechwiz-ai-local": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "elitechwiz-ai",
+    "sandbox",
+    "pentesting",
+    "security",
+    "cli"
+  ],
+  "author": "EliTechWiz-Ai",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Eliahhango/elitechwiz-elitechwiz-ai.git",
+    "directory": "packages/local"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "centrifuge": "^5.0.0",
+    "convex": "^1.29.2",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/ws": "^8.5.0",
+    "typescript": "^5.0.0"
+  }
+}

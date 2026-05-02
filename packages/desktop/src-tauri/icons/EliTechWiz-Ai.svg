@@ -1,0 +1,35 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="120" y1="120" x2="904" y2="904" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B1220"/>
+      <stop offset="0.5" stop-color="#12355B"/>
+      <stop offset="1" stop-color="#1EA7A1"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="512" y1="220" x2="512" y2="790" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#E7F9FF"/>
+      <stop offset="1" stop-color="#B5E6FF"/>
+    </linearGradient>
+    <linearGradient id="monogram" x1="360" y1="410" x2="690" y2="660" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0A2A4A"/>
+      <stop offset="1" stop-color="#0F5A6E"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="48" y="48" width="928" height="928" rx="220" fill="url(#bg)"/>
+  <rect x="70" y="70" width="884" height="884" rx="198" stroke="#7DE6D4" stroke-opacity="0.35" stroke-width="8"/>
+
+  <path d="M512 210L735 330V510C735 648 639 764 512 812C385 764 289 648 289 510V330L512 210Z" fill="url(#shield)"/>
+  <path d="M512 242L706 346V510C706 634 622 730 512 777C402 730 318 634 318 510V346L512 242Z" fill="#D6F2FF" fill-opacity="0.45"/>
+
+  <rect x="356" y="396" width="64" height="252" rx="22" fill="url(#monogram)"/>
+  <rect x="356" y="396" width="188" height="56" rx="18" fill="url(#monogram)"/>
+  <rect x="356" y="492" width="168" height="56" rx="18" fill="url(#monogram)"/>
+  <rect x="356" y="592" width="188" height="56" rx="18" fill="url(#monogram)"/>
+
+  <path d="M575 396L611 648H660L687 500L714 648H763L799 396H744L732 548L700 396H674L642 548L629 396H575Z" fill="url(#monogram)"/>
+
+  <circle cx="512" cy="140" r="18" fill="#7DE6D4" fill-opacity="0.85"/>
+  <circle cx="878" cy="512" r="12" fill="#7DE6D4" fill-opacity="0.85"/>
+  <circle cx="512" cy="884" r="10" fill="#7DE6D4" fill-opacity="0.85"/>
+  <circle cx="146" cy="512" r="14" fill="#7DE6D4" fill-opacity="0.85"/>
+</svg>

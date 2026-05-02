@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schema.tauri.app/config/2/capability",
+  "identifier": "default",
+  "description": "Default capabilities for EliTechWiz-Ai Desktop",
+  "windows": ["main"],
+  "remote": {
+    "urls": ["http://localhost:*", "https://elitechwiz-ai.co/*"]
+  },
+  "permissions": [
+    "core:default",
+    {
+      "identifier": "shell:allow-open",
+      "allow": [
+        { "path": "http://**", "scheme": "http" },
+        { "path": "https://**", "scheme": "https" }
+      ]
+    },
+    "os:default",
+    "process:default",
+    "updater:default",
+    "deep-link:default",
+    "opener:default",
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        { "path": "$HOME/**" },
+        { "path": "$DOWNLOAD/**" },
+        { "path": "/tmp/elitechwiz-ai-upload/**" },
+        { "path": "/tmp/elitechwiz-ai/**" }
+      ]
+    }
+  ]
+}
