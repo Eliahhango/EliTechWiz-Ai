@@ -283,7 +283,7 @@ jobs:
           find packages/desktop/src-tauri/target/${{ matrix.target }}/release/bundle -type f 2>/dev/null || true
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: desktop-${{ matrix.name }}
           path: |
@@ -471,7 +471,7 @@ jobs:
           spctl --assess --type open --context context:primary-signature -v EliTechWiz-Ai-universal.dmg || true
 
       - name: Upload universal artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: desktop-macOS-universal
           path: EliTechWiz-Ai-universal.dmg
