@@ -108,7 +108,7 @@
     "openai": "^6.34.0",
     "pdfjs-serverless": "^1.2.2",
     "posthog-js": "^1.367.0",
-    "posthog-node": "^5.29.2",
+    "posthog-node": "^5.33.4",
     "radix-ui": "^1.4.3",
     "react": "^19.2.5",
     "react-day-picker": "^9.14.0",
